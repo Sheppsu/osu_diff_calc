@@ -25,7 +25,7 @@ packages = [
 ]
 
 setuptools.setup(
-    name="beatmap_reader",
+    name="osu_diff_calc",
     version=version,
     packages=packages,
     author="Sheepposu",
