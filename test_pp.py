@@ -26,3 +26,4 @@ calculator = OsuPerformanceCalculator(
         'spinner_count': beatmap.count_spinners,
     }), OsuScoreAttributes.from_osupy_score(score))
 print(calculator.calculate())
+print(score.pp)
