@@ -95,7 +95,7 @@ class DifficultyCalculator:
         elif current_set_cnt == 1:
             yield current_set[0]
         else:
-            yield Mods.parse_any_list(current_set)
+            yield Mods.combine(current_set)
 
         def check_mod_sets(conditional):
             return any(list(map(
