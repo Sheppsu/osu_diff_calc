@@ -16,6 +16,7 @@ class HitObjectType(IntEnum):
 
 
 class Mods(IntFlag):
+    # TODO: is_compatible_with method
     NoFail = 1 << 0
     Easy = 1 << 1
     TouchDevice = 1 << 2
@@ -39,3 +40,16 @@ class Mods(IntFlag):
     Key7 = 1 << 18
     Key8 = 1 << 19
     Key9 = 1 << 24
+
+    @staticmethod
+    def combine(mods):
+        if len(mods) == 0:
+            return
+        if len(mods) == 1:
+            return mods[0]
+
+        combined_mods = mods[0]
+        for mod in mods[1:]:
+            combined_mods |= mod
+
+        return combined_mods
