@@ -2,6 +2,7 @@ import math
 
 
 class ReverseQueue:
+    # TODO: implement numpy array
     def __init__(self, initial_capacity):
         self.items = [None for _ in range(initial_capacity)]
         self.capacity = initial_capacity
@@ -109,10 +110,11 @@ class StrainSkill(Skill):
     
 
 class StrainDecaySkill(StrainSkill):
+    skill_multiplier = 0
+    strain_decay_base = 0
+
     def __init__(self, mods):
         super().__init__(mods)
-        self.skill_multiplier = 0
-        self.strain_decay_base = 0
         self.current_strain = 0
 
     def calculate_initial_strain(self, start_time):
