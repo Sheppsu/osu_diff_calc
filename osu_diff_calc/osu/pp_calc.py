@@ -120,7 +120,7 @@ class OsuPerformanceCalculator(PerformanceCalculator):
         if int(Mods.Hidden) & self.mods:
             aim_value *= 1 + 0.04 * (12 - self.attributes.approach_rate)
 
-        estimate_difficulty_sliders = self.attributes.slider_count + 0.15
+        estimate_difficulty_sliders = self.attributes.slider_count * 0.15
 
         if self.attributes.slider_count > 0:
             estimate_slider_ends_dropped = Util.clamp(min(self.count_ok + self.count_meh + self.count_miss,
