@@ -18,6 +18,7 @@ class OsuDifficultyAttributes(DifficultyAttributes):
         self.speed_strain = None
         self.flashlight_rating = None
         self.slider_factor = None
+        self.speed_note_count = None
         self.approach_rate = None
         self.overall_difficulty = None
         self.drain_rate = None

@@ -40,6 +40,8 @@ class OsuScoreAttributes:
 
 
 class OsuPerformanceCalculator(PerformanceCalculator):
+    PERFORMANCE_BASE_MULTIPLIER = 1.14
+
     def __init__(self, ruleset, attributes: OsuDifficultyAttributes, score: OsuScoreAttributes):
         super().__init__(ruleset, attributes, score)
 
@@ -54,7 +56,7 @@ class OsuPerformanceCalculator(PerformanceCalculator):
         self.effective_miss_count = self.calculate_effective_miss_count()
 
     def calculate(self, category_ratings=None):
-        multiplier = 1.12
+        multiplier = self.PERFORMANCE_BASE_MULTIPLIER
 
         if int(Mods.NoFail) & self.mods:
             multiplier *= max(0.9, 1 - 0.02 * self.effective_miss_count)
@@ -63,7 +65,13 @@ class OsuPerformanceCalculator(PerformanceCalculator):
             multiplier *= 1 - math.pow(self.attributes.spinner_count / self.total_hits, 0.85)
 
         if int(Mods.Relax) & self.mods:
-            self.effective_miss_count = min(self.effective_miss_count + self.count_ok + self.count_meh, self.total_hits)
+            ok_multiplier = max(0, 1 - math.pow(self.attributes.overall_difficulty / 13.33,
+                                                1.8) if self.attributes.overall_difficulty > 0 else 1)
+            meh_multiplier = max(0, 1 - math.pow(self.attributes.overall_difficulty / 13.33,
+                                                 5) if self.attributes.overall_difficulty > 0 else 1)
+
+            self.effective_miss_count = min(self.effective_miss_count + self.count_ok *
+                                            ok_multiplier + self.count_meh * meh_multiplier, self.total_hits)
             multiplier *= 0.6
 
         aim_value = self.compute_aim_value()
@@ -93,9 +101,6 @@ class OsuPerformanceCalculator(PerformanceCalculator):
     def compute_aim_value(self):
         raw_aim = self.attributes.aim_strain
 
-        if int(Mods.TouchDevice) & self.mods:
-            raw_aim = math.pow(raw_aim, 0.8)
-
         aim_value = math.pow(5 * max(1, raw_aim / 0.0675) - 4, 3) / 100000
 
         length_bonus = 0.95 + 0.4 * min(1, self.total_hits / 2000) + \
@@ -106,14 +111,16 @@ class OsuPerformanceCalculator(PerformanceCalculator):
         if self.effective_miss_count > 0:
             aim_value *= 0.97 * math.pow(1 - math.pow(self.effective_miss_count / self.total_hits, 0.775), self.effective_miss_count)
 
-        if self.attributes.max_combo > 0:
-            aim_value *= min(math.pow(self.score_max_combo, 0.8) / math.pow(self.attributes.max_combo, 0.8), 1)
+        aim_value *= self.get_combo_scaling_factor()
 
         approach_rate_factor = 0
         if self.attributes.approach_rate > 10.33:
             approach_rate_factor = 0.3 * (self.attributes.approach_rate - 10.33)
         elif self.attributes.approach_rate < 8:
             approach_rate_factor = 0.1 * (8 - self.attributes.approach_rate)
+
+        if int(Mods.Relax) & self.mods:
+            approach_rate_factor = 0
 
         aim_value *= 1 + approach_rate_factor * length_bonus
 
@@ -137,6 +144,9 @@ class OsuPerformanceCalculator(PerformanceCalculator):
         return aim_value
 
     def compute_speed_value(self):
+        if int(Mods.Relax) & self.mods:
+            return 0
+
         speed_value = math.pow(5 * max(1, self.attributes.speed_strain / 0.0675) - 4, 3) / 100000
 
         length_bonus = 0.95 + 0.4 * min(1, self.total_hits / 2000) + \
@@ -148,8 +158,7 @@ class OsuPerformanceCalculator(PerformanceCalculator):
             speed_value *= 0.97 * math.pow(1 - math.pow(self.effective_miss_count / self.total_hits, 0.775),
                                            math.pow(self.effective_miss_count, 0.875))
 
-        if self.attributes.max_combo > 0:
-            speed_value *= min(math.pow(self.score_max_combo, 0.8) / math.pow(self.attributes.max_combo, 0.8), 1)
+        speed_value *= self.get_combo_scaling_factor()
 
         approach_rate_factor = 0
         if self.attributes.approach_rate > 10.33:
@@ -160,10 +169,17 @@ class OsuPerformanceCalculator(PerformanceCalculator):
         if int(Mods.Hidden) & self.mods:
             speed_value *= 1 + 0.04 * (12 - self.attributes.approach_rate)
 
-        speed_value *= (0.95 + math.pow(self.attributes.overall_difficulty, 2) / 750) * \
-            math.pow(self.accuracy, (14.5 - max(self.attributes.overall_difficulty, 8)) / 2)
+        relevant_total_diff = self.total_hits - self.attributes.speed_note_count
+        relevant_great_count = max(0, self.count_great - relevant_total_diff)
+        relevant_ok_count = max(0, self.count_ok - max(0, relevant_total_diff - self.count_great))
+        relevant_meh_count = max(0, self.count_meh - max(0, relevant_total_diff - self.count_great - self.count_ok))
+        relevant_accuracy = 0 if self.attributes.speed_note_count == 0 else \
+            (relevant_great_count * 6 + relevant_ok_count * 2 + relevant_meh_count) / (self.attributes.speed_note_count * 6)
 
-        speed_value *= math.pow(0.98, 0 if self.count_meh < self.total_hits / 500 else self.count_meh - self.total_hits / 500)
+        speed_value *= (0.95 + math.pow(self.attributes.overall_difficulty, 2) / 750) * \
+            math.pow((self.accuracy + relevant_accuracy) / 2, (14.5 - max(self.attributes.overall_difficulty, 8)) / 2)
+
+        speed_value *= math.pow(0.99, 0 if self.count_meh < self.total_hits / 500 else self.count_meh - self.total_hits / 500)
 
         return speed_value
 
@@ -203,20 +219,13 @@ class OsuPerformanceCalculator(PerformanceCalculator):
 
         raw_flashlight = self.attributes.flashlight_rating
 
-        if int(Mods.TouchDevice) & self.mods:
-            raw_flashlight = math.pow(raw_flashlight, 0.8)
-
         flashlight_value = math.pow(raw_flashlight, 2) * 25
-
-        if int(Mods.Hidden) & self.mods:
-            flashlight_value *= 1.3
 
         if self.effective_miss_count > 0:
             flashlight_value *= 0.97 * math.pow(1 - math.pow(self.effective_miss_count / self.total_hits, 0.775),
                                                 math.pow(self.effective_miss_count, 0.875))
 
-        if self.attributes.max_combo > 0:
-            flashlight_value *= min(math.pow(self.score_max_combo, 0.8) / math.pow(self.attributes.max_combo, 0.8), 1)
+        flashlight_value *= self.get_combo_scaling_factor()
 
         flashlight_value *= 0.7 + 0.1 * min(1, self.total_hits / 200) + \
             (0.2 * min(1, (self.total_hits - 200) / 200) if self.total_hits > 200 else 0)
@@ -233,6 +242,10 @@ class OsuPerformanceCalculator(PerformanceCalculator):
             if self.score_max_combo < full_combo_threshold:
                 combo_based_miss_count = full_combo_threshold / max(1, self.score_max_combo)
 
-        combo_based_miss_count = min(combo_based_miss_count, self.total_hits)
+        combo_based_miss_count = min(combo_based_miss_count, self.count_ok + self.count_meh + self.count_miss)
 
-        return max(self.count_miss, math.floor(combo_based_miss_count))
+        return max(self.count_miss, combo_based_miss_count)
+
+    def get_combo_scaling_factor(self):
+        return 1 if self.attributes.max_combo <= 0 else min(math.pow(self.score_max_combo, 0.8) /
+                                                            math.pow(self.attributes.max_combo, 0.8), 1)
