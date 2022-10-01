@@ -13,6 +13,7 @@ def calculate_pp(beatmap, beatmap_attributes, score):
             'speed_strain': beatmap_attributes.mode_attributes.speed_difficulty,
             'flashlight_rating': beatmap_attributes.mode_attributes.flashlight_difficulty,
             'slider_factor': beatmap_attributes.mode_attributes.slider_factor,
+            'speed_note_count': beatmap_attributes.mode_attributes.speed_note_count,
             'approach_rate': beatmap_attributes.mode_attributes.approach_rate,
             'overall_difficulty': beatmap_attributes.mode_attributes.overall_difficulty,
             'max_combo': beatmap_attributes.max_combo,
@@ -33,7 +34,7 @@ search_result = client.search_beatmapsets(BeatmapsetSearchFilter().set_mode(Game
 beatmapsets: Sequence[Beatmapset] = search_result["beatmapsets"]
 for beatmapset in beatmapsets[:10]:
     print(f"{beatmapset.artist} - {beatmapset.title}")
-    beatmap = beatmapset.beatmaps[-1]
+    beatmap = beatmapset.beatmaps[0]
     scores = client.get_beatmap_scores(beatmap.id)
     attributes = {}
     for score in scores.scores[:5]:

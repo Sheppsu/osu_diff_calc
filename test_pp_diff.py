@@ -64,6 +64,7 @@ diff = OsuDifficultyAttributes.from_attributes({
     'speed_strain': nomod_diff.mode_attributes.speed_difficulty,
     'flashlight_rating': nomod_diff.mode_attributes.flashlight_difficulty,
     'slider_factor': nomod_diff.mode_attributes.slider_factor,
+    'speed_note_count': nomod_diff.mode_attributes.speed_note_count,
     'approach_rate': nomod_diff.mode_attributes.approach_rate,
     'overall_difficulty': nomod_diff.mode_attributes.overall_difficulty,
     'max_combo': nomod_diff.max_combo,
