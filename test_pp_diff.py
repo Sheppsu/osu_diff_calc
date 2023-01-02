@@ -24,7 +24,9 @@ calculator = BeatmapCalculator(beatmap)
 
 
 difficulty = []
-for mod in (None, ):#Mods.HardRock, Mods.DoubleTime, Mods.Easy, Mods.HalfTime, Mods.Flashlight):
+for mod in (None, Mods.HardRock, Mods.DoubleTime, Mods.Easy, Mods.HalfTime, Mods.Flashlight):
+    if mod is not None:
+        beatmap.apply_mods(mod)
     difficulty.append(calculator.get_difficulty_attributes(mod))
 
 
@@ -44,8 +46,8 @@ def get_ss_pp(diff, mode):
 
 
 for diff in difficulty:
-    print(diff.mods, diff.star_rating, diff.aim_strain, diff.speed_strain,
-          diff.flashlight_rating, diff.slider_factor, f"{get_ss_pp(diff, beatmap.general.mode)}pp")
+    print(diff.mods, diff.star_rating, diff.aim_difficulty, diff.speed_difficulty, diff.speed_note_count,
+          diff.flashlight_difficulty, diff.slider_factor, diff.max_combo, f"{get_ss_pp(diff, beatmap.general.mode)}pp")
 
 
 client_id = int(getenv('osu_client_id'))
@@ -60,9 +62,9 @@ hit_circle_count = len([obj for obj in beatmap.hit_objects if obj.type == HitObj
 slider_count = len([obj for obj in beatmap.hit_objects if obj.type == HitObjectType.SLIDER])
 spinner_count = len([obj for obj in beatmap.hit_objects if obj.type == HitObjectType.SPINNER])
 diff = OsuDifficultyAttributes.from_attributes({
-    'aim_strain': nomod_diff.mode_attributes.aim_difficulty,
-    'speed_strain': nomod_diff.mode_attributes.speed_difficulty,
-    'flashlight_rating': nomod_diff.mode_attributes.flashlight_difficulty,
+    'aim_difficulty': nomod_diff.mode_attributes.aim_difficulty,
+    'speed_difficulty': nomod_diff.mode_attributes.speed_difficulty,
+    'flashlight_difficulty': nomod_diff.mode_attributes.flashlight_difficulty,
     'slider_factor': nomod_diff.mode_attributes.slider_factor,
     'speed_note_count': nomod_diff.mode_attributes.speed_note_count,
     'approach_rate': nomod_diff.mode_attributes.approach_rate,
@@ -75,5 +77,7 @@ diff = OsuDifficultyAttributes.from_attributes({
 })
 print("Correct values", nomod_diff.star_rating, nomod_diff.mode_attributes.aim_difficulty,
       nomod_diff.mode_attributes.speed_difficulty,
+      nomod_diff.mode_attributes.speed_note_count,
       nomod_diff.mode_attributes.flashlight_difficulty,
-      nomod_diff.mode_attributes.slider_factor, f"{get_ss_pp(diff, beatmap.general.mode)}pp\n")
+      nomod_diff.mode_attributes.slider_factor,
+      nomod_diff.max_combo, f"{get_ss_pp(diff, beatmap.general.mode)}pp\n")

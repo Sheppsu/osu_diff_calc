@@ -2,6 +2,7 @@ from ..pp_calc import PerformanceCalculator
 from .diff_calc import OsuDifficultyAttributes
 from ..util import Util
 from ..enums import Mods
+
 import math
 
 
@@ -43,7 +44,7 @@ class OsuPerformanceCalculator(PerformanceCalculator):
     PERFORMANCE_BASE_MULTIPLIER = 1.14
 
     def __init__(self, ruleset, attributes: OsuDifficultyAttributes, score: OsuScoreAttributes):
-        super().__init__(ruleset, attributes, score)
+        super().__init__(ruleset, attributes)
 
         self.mods = score.mods if score.mods else 0
         self.accuracy = score.accuracy
@@ -61,7 +62,7 @@ class OsuPerformanceCalculator(PerformanceCalculator):
         if int(Mods.NoFail) & self.mods:
             multiplier *= max(0.9, 1 - 0.02 * self.effective_miss_count)
 
-        if int(Mods.SpunOut) & self.mods:
+        if int(Mods.SpunOut) & self.mods and self.total_hits > 0:
             multiplier *= 1 - math.pow(self.attributes.spinner_count / self.total_hits, 0.85)
 
         if int(Mods.Relax) & self.mods:
@@ -94,12 +95,13 @@ class OsuPerformanceCalculator(PerformanceCalculator):
                 "od": self.attributes.overall_difficulty,
                 "ar": self.attributes.approach_rate,
                 "max_combo": self.attributes.max_combo,
+                "effective_miss_count": self.effective_miss_count
             })
 
         return total_value
 
     def compute_aim_value(self):
-        raw_aim = self.attributes.aim_strain
+        raw_aim = self.attributes.aim_difficulty
 
         aim_value = math.pow(5 * max(1, raw_aim / 0.0675) - 4, 3) / 100000
 
@@ -117,7 +119,7 @@ class OsuPerformanceCalculator(PerformanceCalculator):
         if self.attributes.approach_rate > 10.33:
             approach_rate_factor = 0.3 * (self.attributes.approach_rate - 10.33)
         elif self.attributes.approach_rate < 8:
-            approach_rate_factor = 0.1 * (8 - self.attributes.approach_rate)
+            approach_rate_factor = 0.05 * (8 - self.attributes.approach_rate)
 
         if int(Mods.Relax) & self.mods:
             approach_rate_factor = 0
@@ -147,7 +149,7 @@ class OsuPerformanceCalculator(PerformanceCalculator):
         if int(Mods.Relax) & self.mods:
             return 0
 
-        speed_value = math.pow(5 * max(1, self.attributes.speed_strain / 0.0675) - 4, 3) / 100000
+        speed_value = math.pow(5 * max(1, self.attributes.speed_difficulty / 0.0675) - 4, 3) / 100000
 
         length_bonus = 0.95 + 0.4 * min(1, self.total_hits / 2000) + \
             (math.log10(self.total_hits / 2000) * 0.5 if self.total_hits > 2000 else 0)
@@ -209,7 +211,7 @@ class OsuPerformanceCalculator(PerformanceCalculator):
             accuracy_value *= 1.08
 
         if int(Mods.Flashlight) & self.mods:
-            self.accuracy *= 1.02
+            accuracy_value *= 1.02
 
         return accuracy_value
 
@@ -217,7 +219,7 @@ class OsuPerformanceCalculator(PerformanceCalculator):
         if not int(Mods.Flashlight) & self.mods:
             return 0
 
-        raw_flashlight = self.attributes.flashlight_rating
+        raw_flashlight = self.attributes.flashlight_difficulty
 
         flashlight_value = math.pow(raw_flashlight, 2) * 25
 

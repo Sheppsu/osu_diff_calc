@@ -1,6 +1,26 @@
 from .enums import Mods
 
 
+class HitWindow:
+    PERFECT = (22.4, 19.4, 13.9)
+    GREAT = (64, 49, 34)
+    GOOD = (97, 82, 67)
+    OK = (127, 112, 97)
+    MEH = (151, 136, 121)
+    MISS = (188, 173, 158)
+
+    @staticmethod
+    def window_for(od, hit):
+        return Util.difficulty_range(od, *hit)
+
+
+class OsuHitWindow(HitWindow):
+    GREAT = (80, 50, 20)
+    OK = (140, 100, 60)
+    MEH = (200, 150, 100)
+    MISS = (400, 400, 400)
+
+
 class Util:
     @staticmethod
     def clamp(value, min_value, max_value):

@@ -1,5 +1,9 @@
-from . import OsuDifficultyCalculator
-from .enums import GameMode
+from .osu import (
+    OsuDifficultyCalculator,
+    OsuPerformanceCalculator,
+    OsuScoreAttributes
+)
+from .enums import GameMode, Mods
 
 
 class BeatmapCalculator:
@@ -24,3 +28,8 @@ class BeatmapCalculator:
 
     def calculate_difficulty_attributes(self, mods):
         self.difficulty_attributes[mods] = self.calculator.calculate(mods)
+
+    def calculate_pp(self, score: OsuScoreAttributes, mods: Mods = None, extra_info: dict = None):
+        diff_attributes = self.get_difficulty_attributes(mods)
+        calculator = OsuPerformanceCalculator(self.beatmap.general.mode, diff_attributes, score)
+        return calculator.calculate(extra_info)

@@ -1,0 +1,1 @@
+git+https://github.com/Sheepposu/beatmap_reader@5a55c6fd67cb6facb0f01bbcfd74b60501b2c52c#egg=beatmap_reader

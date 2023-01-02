@@ -9,9 +9,9 @@ def calculate_pp(beatmap, beatmap_attributes, score):
     calculator = OsuPerformanceCalculator(
         GameModeStr.STANDARD,
         OsuDifficultyAttributes.from_attributes({
-            'aim_strain': beatmap_attributes.mode_attributes.aim_difficulty,
-            'speed_strain': beatmap_attributes.mode_attributes.speed_difficulty,
-            'flashlight_rating': beatmap_attributes.mode_attributes.flashlight_difficulty,
+            'aim_difficulty': beatmap_attributes.mode_attributes.aim_difficulty,
+            'speed_difficulty': beatmap_attributes.mode_attributes.speed_difficulty,
+            'flashlight_difficulty': beatmap_attributes.mode_attributes.flashlight_difficulty,
             'slider_factor': beatmap_attributes.mode_attributes.slider_factor,
             'speed_note_count': beatmap_attributes.mode_attributes.speed_note_count,
             'approach_rate': beatmap_attributes.mode_attributes.approach_rate,

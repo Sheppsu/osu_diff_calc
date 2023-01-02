@@ -1,12 +1,12 @@
 from .enums import Mods
 from .util import Util
+
 from typing import List, Union
 
 
 class DifficultyAttributes:
-    def __init__(self, mods=None, skills=None, star_rating=None):
+    def __init__(self, mods=None, star_rating=None):
         self.mods = mods
-        self.skills = skills
         self.star_rating = star_rating
         self.max_combo = 0
 
@@ -47,7 +47,7 @@ class DifficultyCalculator:
 
         for hit_obj in self.get_difficulty_hit_objects():
             for skill in skills:
-                skill.process_internal(hit_obj)
+                skill.process(hit_obj)
 
         return self.create_difficulty_attributes(self.beatmap, self.playable_mods, skills, self.clock_rate)
 
@@ -66,7 +66,7 @@ class DifficultyCalculator:
             progressive_beatmap.hit_objects.append(hit_obj.base_object)
 
             for skill in skills:
-                skill.process_internal(hit_obj)
+                skill.process(hit_obj)
 
             attribs.append(TimedDifficultyAttributes(
                 hit_obj.end_time * self.clock_rate, self.create_difficulty_attributes(
