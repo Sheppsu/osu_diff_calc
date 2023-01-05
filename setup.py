@@ -21,9 +21,9 @@ classifiers = [
 
 packages = [
     'osu_diff_calc',
-    'osu_diff_calc.osu'
-    'osu_diff_calc.osu.evaluators'
-    'osu_diff_calc.osu.skills'
+    'osu_diff_calc.osu',
+    'osu_diff_calc.osu.evaluators',
+    'osu_diff_calc.osu.skills',
 ]
 
 setuptools.setup(
