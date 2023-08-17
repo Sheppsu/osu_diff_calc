@@ -28,10 +28,10 @@ class OsuScoreAttributes:
             "mods": score.mods,
             "accuracy": score.accuracy,
             "score_max_combo": score.max_combo,
-            "count_great": score.statistics.count_300,
-            "count_ok": score.statistics.count_100,
-            "count_meh": score.statistics.count_50,
-            "count_miss": score.statistics.count_miss
+            "count_great": score.statistics.great,
+            "count_ok": score.statistics.ok,
+            "count_meh": score.statistics.meh,
+            "count_miss": score.statistics.miss
         })
         return score_attributes
 
