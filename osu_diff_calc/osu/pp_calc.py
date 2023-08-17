@@ -25,7 +25,8 @@ class OsuScoreAttributes:
     def from_osupy_score(cls, score):
         score_attributes = cls()
         score_attributes.set_attributes({
-            "mods": score.mods,
+            # adding fine since there shouldn't be any duplicates
+            "mods": Mods(sum(map(lambda m: Mods[m.mod.name].value, score.mods))),
             "accuracy": score.accuracy,
             "score_max_combo": score.max_combo,
             "count_great": score.statistics.great or 0,
